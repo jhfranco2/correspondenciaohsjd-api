@@ -1,6 +1,9 @@
 package org.ordenhospitalaria.correspondenciaohsjd.correspondenciaohsjd.controladores;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.ordenhospitalaria.correspondenciaohsjd.correspondenciaohsjd.modelos.Ci;
@@ -11,6 +14,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -18,6 +24,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping(value = { "/correspondencia-api/v1" })
@@ -45,7 +53,18 @@ public class CorrespondenciaControlador {
     }
 
     @PostMapping("/crear-libro-ci")
-    public ResponseEntity<?> crearUsuario(@ModelAttribute Ci ci) {
+    public ResponseEntity<?> crearUsuario(@Validated @ModelAttribute Ci ci, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            Map<String, List<String>> errores = new HashMap<>();
+            for (FieldError fieldError : bindingResult.getFieldErrors()) {
+                String campo = fieldError.getField();
+                String mensaje = fieldError.getDefaultMessage();
+
+                errores.computeIfAbsent(campo, key -> new ArrayList<>()).add(mensaje);
+            }
+            return ResponseEntity.badRequest().body(Collections.singletonMap("errores", errores));
+        }
+
         Map<String, String> mensaje = new HashMap<>();
         try {
             ciService.crearCi(ci);
@@ -57,6 +76,5 @@ public class CorrespondenciaControlador {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mensaje);
         }
     }
-    
 
 }

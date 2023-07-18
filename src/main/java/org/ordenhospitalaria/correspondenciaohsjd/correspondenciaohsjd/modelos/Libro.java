@@ -2,6 +2,7 @@ package org.ordenhospitalaria.correspondenciaohsjd.correspondenciaohsjd.modelos;
 
 import java.util.Date;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @MappedSuperclass
@@ -18,10 +19,12 @@ public abstract class Libro {
     private String numeroDocumento;
 
     @Temporal(TemporalType.TIMESTAMP)
+    @NotNull(message = "la fecha debe tener este formato y no estar vacia YYYY-MM-DD")
     private Date fechaSolicitud;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false)
+    @NotNull(message = "la fecha debe tener este formato y no estar vacia YYYY-MM-DD")
     private Date fechaEntrada;
 
     @Column(length = 1)
@@ -41,6 +44,7 @@ public abstract class Libro {
 
     @ManyToOne
     @JoinColumn(name = "proceso_id", nullable = false)
+    @NotNull(message = "Debe tener asociado un proceso")
     private Proceso proceso;
 
     @Column(length = 48)
